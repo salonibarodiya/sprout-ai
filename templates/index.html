@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprout AI | Multi-Agent Nanny & Tutor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .chat-container { height: 60vh; overflow-y: auto; scroll-behavior: smooth; }
+        .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); }
+        .user-msg { background: #e8f5e9; align-self: flex-end; border-radius: 18px 18px 0 18px; border: 1px solid #c8e6c9; }
+        .ai-msg { background: #ffffff; align-self: flex-start; border-radius: 18px 18px 18px 0; border: 1px solid #e2e8f0; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #81c784; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-green-50 via-white to-blue-50 min-h-screen font-sans text-gray-800">
+
+    <div class="container mx-auto px-4 py-6 max-w-6xl">
+        <header class="flex justify-between items-center mb-8 bg-white p-4 rounded-2xl shadow-sm border border-green-100">
+            <div class="flex items-center gap-3">
+                <div class="bg-green-600 p-2 rounded-lg text-white">
+                    <i class="fas fa-seedling text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black text-green-700 tracking-tight">SPROUT AI</h1>
+                    <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Multi-Agent System</p>
+                </div>
+            </div>
+            <div class="hidden md:flex gap-4">
+                <span class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-bold">Cloud Run Live</span>
+                <span class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-bold">Firestore Connected</span>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <div class="lg:col-span-3 space-y-6">
+                <div class="glass p-5 rounded-3xl shadow-lg border border-white">
+                    <h2 class="font-bold text-gray-700 mb-4 flex items-center gap-2 text-sm">
+                        <i class="fas fa-microchip text-green-500"></i> AGENT ACTIVITY
+                    </h2>
+                    <div id="agent-logs" class="space-y-3">
+                        <div class="flex items-center gap-2 text-[11px] text-gray-500">
+                            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                            System: Monitoring Active
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass p-5 rounded-3xl shadow-lg border border-white">
+                    <h2 class="font-bold text-gray-700 mb-3 flex items-center gap-2 text-sm">
+                        <i class="fas fa-database text-blue-500"></i> FIRESTORE DATA
+                    </h2>
+                    <div id="db-preview" class="text-[10px] text-gray-400 italic">
+                        No recent transactions.
+                    </div>
+                </div>
+
+                <div class="bg-green-600 p-5 rounded-3xl text-white shadow-xl relative overflow-hidden">
+                    <i class="fas fa-graduation-cap absolute -right-2 -bottom-2 text-6xl opacity-10"></i>
+                    <h3 class="font-bold text-sm">Tutor Mode</h3>
+                    <p class="text-[11px] mt-2 opacity-90">Sprout uses Gemini 2.5 to generate personalized phonic lessons.</p>
+                </div>
+            </div>
+
+            <div class="lg:col-span-9 flex flex-col h-full">
+                <div class="glass p-6 rounded-3xl shadow-2xl border border-white flex flex-col h-full">
+                    
+                    <div id="chat-window" class="chat-container flex flex-col space-y-4 mb-4 p-2">
+                        <div class="ai-msg p-4 max-w-[80%] shadow-sm">
+                            <span class="text-[10px] font-bold text-green-600 uppercase tracking-widest block mb-1">Primary Coordinator</span>
+                            Namaste Saloni! Sprout AI is ready. Main aapke baby ki tasks, study aur safety manage karne mein help karunga. Aaj kya schedule karein?
+                        </div>
+                    </div>
+
+                    <div class="mt-auto relative">
+                        <div class="flex gap-3 items-center bg-gray-50 p-2 rounded-2xl border border-gray-200">
+                            <div class="pl-3 text-gray-400">
+                                <i class="fas fa-comment-dots"></i>
+                            </div>
+                            <input type="text" id="user-input" 
+                                class="flex-1 p-3 bg-transparent focus:outline-none text-gray-700 font-medium" 
+                                placeholder="E.g., Schedule dance at 5 PM or teach phonics..."
+                                onkeypress="if(event.key === 'Enter') sendMessage()">
+                            <button onclick="sendMessage()" class="bg-green-600 hover:bg-green-700 text-white w-12 h-12 rounded-xl transition-all flex items-center justify-center shadow-lg">
+                                <i class="fas fa-arrow-up"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const chatWindow = document.getElementById('chat-window');
+            const agentLogs = document.getElementById('agent-logs');
+            const dbPreview = document.getElementById('db-preview');
+            
+            if(!input.value.trim()) return;
+
+            const userText = input.value;
+            input.value = '';
+
+            // User Message UI
+            chatWindow.innerHTML += `<div class="user-msg p-4 max-w-[80%] shadow-sm ml-auto font-medium">${userText}</div>`;
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+
+            // Log Agent Action
+            agentLogs.innerHTML = `<div class="flex items-center gap-2 text-[11px] text-blue-500 font-bold">
+                <i class="fas fa-spinner animate-spin"></i> Analyzing Intent...
+            </div>`;
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({message: userText})
+                });
+                const data = await response.json();
+
+                // AI Response UI
+                chatWindow.innerHTML += `
+                    <div class="ai-msg p-4 max-w-[85%] shadow-sm border-l-4 border-green-500">
+                        <span class="text-[9px] font-black text-green-600 uppercase tracking-tighter block mb-1 italic">Active Agent: ${data.agent}</span>
+                        <div class="text-sm leading-relaxed text-gray-700">${data.reply}</div>
+                    </div>`;
+                
+                // Update Sidebar Logs
+                agentLogs.innerHTML = `
+                    <div class="text-[10px] text-gray-500"><i class="fas fa-check-circle text-green-500 mr-1"></i> Intent: ${data.agent}</div>
+                    <div class="text-[10px] text-gray-500"><i class="fas fa-bolt text-yellow-500 mr-1"></i> Tool: DB_Connector_v1</div>
+                `;
+
+                // Update Database Mock View
+                if(userText.toLowerCase().includes('schedule') || userText.toLowerCase().includes('plan')) {
+                    dbPreview.innerHTML = `<div class="p-2 bg-blue-50 rounded-lg text-blue-700 font-mono">[Success] Firestore Write @ ${new Date().toLocaleTimeString()}</div>`;
+                }
+
+            } catch (err) {
+                chatWindow.innerHTML += `<div class="text-red-500 text-[10px] text-center bg-red-50 p-2 rounded-lg mt-2">Connection Error: Check Cloud Run Logs</div>`;
+            }
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+    </script>
+</body>
+</html>

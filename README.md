@@ -20,8 +20,7 @@ Sprout AI is an advanced Multi-Agent system designed to help parents manage comp
 - **API-Based:** Fully containerized Flask application.
 
 ## 🔗 Project Links
-- **Live Demo (Cloud Run):** [YAHAN APNA CLOUD RUN LINK PASTE KARO]
-- **Video Demo:** [YAHAN APNA VIDEO LINK YA GOOGLE DRIVE LINK PASTE KARO]
+- **Video Demo:** https://drive.google.com/file/d/1ssFKPWbI34blf9pKJ-y4Hz5RLugpGYsb/view?usp=sharing
 
 ## 📂 Structure
 - `app.py`: Main Orchestrator and Agent logic.
